@@ -15,10 +15,21 @@ body {
   font-size:20px;
   background-color: #6114cc;
   color:#fff;
+  padding: 6.25%;
+  transition: opacity 0.3s ease-in-out;
+
+  .js &.show {
+    opacity:1;
+  }
+}
+
+.js body {
+  opacity:0;
 }
 
 .js h1 {
   visibility: hidden;
+  
 }
 
 a, a:visited, a:hover {
@@ -29,10 +40,13 @@ a, a:visited, a:hover {
 
 h1,h2 {
   font-family: 'Montserrat', sans-serif;
+  //border-bottom:5px solid #fff;
 }
 
+h1 {font-size:80px;}
+
 p {
-  font-family: 'Cardo', serif;
+  font-family: 'Domine', serif;
 }
 
 .hero {
@@ -45,6 +59,26 @@ p {
     
   left: 50%;
   transform: translate(-50%, -50%);
+  
+  img {
+    
+    animation-delay: 4.5s;
+  }
+
+ 
+}
+
+.bounce {
+  animation: bounce 1s .5s;
+  transform: scale(0.85);
+}
+
+@keyframes bounce {
+  0% { transform: scale(0); opacity: 1 }
+  50% { transform: scale(1.6); opacity: .7; }
+  60% { transform: scale(0.6); opacity: 1 }
+  80% { transform: scale(0.95) }
+  100% { transform: scale(1) }
 }
 
 .wrap {
@@ -112,31 +146,23 @@ p {
 }
 
 /* Responsive: Portrait tablets and up */
-@media screen and (min-width: 768px) {
-  .container {
-    max-width: 730px;
-  }
-
-  /* Remove the padding we set earlier */
-  .header,
-  .marketing,
-  .footer {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  /* Space out the masthead */
-  .header {
-    margin-bottom: 30px;
-  }
-
-  /* Remove the bottom border on the jumbotron for visual effect */
-  .jumbotron {
-    border-bottom: 0;
+@media screen and (max-width: 768px) {
+  h1 {
+    font-size:50px;
   }
 }
 
+@media screen and (max-width: 600px) {
+  h1 {
+    font-size:40px;
+  }
+}
 
+@media screen and (max-width: 500px) {
+  h1 {
+    font-size:30px;
+  }
+}
 
 .down-chevron {
     position: absolute;
