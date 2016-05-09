@@ -88,7 +88,7 @@ p {
     max-width: 600px;
     min-height: 100vh;
     margin: auto;
-    padding: 5vh 0
+    padding: 6vh 0
 }
 
 .wrap:after {
@@ -125,7 +125,7 @@ p {
 }
 
 .wrap {
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -136,7 +136,7 @@ p {
     -webkit-align-items: center;
     -ms-flex-align: center;
     align-items: center;
-    height: 100vh;
+    
     min-height: 100vh
 }
 
