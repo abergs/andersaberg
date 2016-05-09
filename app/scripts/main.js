@@ -5,16 +5,16 @@ $('body').colorScroll({
     position: '0vh'
   }, {
     color: '#009cf3',
-    position: '1vh'
+    position: '1.2vh'
   }, {
     color: '#52E280',
-    position: '2vh'
+    position: '2.2vh'
   }, {
     color: '#FFBF02',
-    position: '3vh'
+    position: '3.2vh'
   }, {
     color: '#F9615B',
-    position: '4vh'
+    position: '4.2vh'
   }]
 });
 
