@@ -7,7 +7,7 @@ $('body').colorScroll({
     color: '#009cf3',
     position: '1vh'
   }, {
-    color: '#59E878',
+    color: '#42996A',
     position: '2vh'
   }, {
     color: '#FFBF02',
