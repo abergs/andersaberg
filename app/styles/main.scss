@@ -11,14 +11,99 @@ $icon-font-path: '../fonts/';
   padding: 0.2em 0;
 }
 
+body {
+  font-size:20px;
+  background-color: #6114cc;
+  color:#fff;
+}
+
+.js h1 {
+  visibility: hidden;
+}
+
+a, a:visited, a:hover {
+  color:#fff;
+  text-decoration:  underline;
+  font-weight:  bold;
+}
+
+h1,h2 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+p {
+  font-family: 'Cardo', serif;
+}
+
+.hero {
+  position:   relative;
+}
+
+#scrollMotivator {
+  position:   absolute; 
+    bottom:   10%;
+    
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .wrap {
     overflow: hidden;
     position: relative;
     width: 100%;
-    max-width: 1800px;
+    max-width: 600px;
     min-height: 100vh;
     margin: auto;
     padding: 5vh 0
+}
+
+.wrap:after {
+    content: " ";
+    clear: both;
+    display: block
+}
+.wrap-width {
+  max-width:  600px;
+}
+.herowrap{
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 1080px;
+    min-height: 100vh;
+    margin: auto;
+    padding: 5vh 0;
+
+    overflow: hidden;
+    position: relative;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    flex-direction:column;
+    height: 100vh;
+    min-height: 100vh
+}
+
+.wrap {
+    overflow: hidden;
+    position: relative;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 100vh;
+    min-height: 100vh
 }
 
 
@@ -49,4 +134,45 @@ $icon-font-path: '../fonts/';
   .jumbotron {
     border-bottom: 0;
   }
+}
+
+
+
+.down-chevron {
+    position: absolute;
+    top: 73%;
+    left: 0;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 100%
+}
+
+ .down-chevron svg {
+    width: 100px;
+    height: 50px
+}
+
+
+.down-chevron {
+    display: inline-block;
+    width: 100px;
+    height: 50px;
+    fill: #fff
+}
+
+.down-chevron g:not(:last-child) {
+    display: none
+}
+
+.down-chevron.loaded {
+    -webkit-animation: bumpChevron 4.2s infinite;
+    animation: bumpChevron 4.2s infinite
+}
+
+.js .down-chevron g {
+    display: inline
 }
