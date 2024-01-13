@@ -1,0 +1,328 @@
+---
+---
+
+<div>
+<div id="scene" style=""></div>
+<div id="canvas" style="display:none; height: 500px; width: 500px"></div>
+
+<script is:inline src="./leon.js"></script>
+<script is:inline src="/matter.min.js"></script>
+</div>
+
+<script>
+    import {Application, Graphics, settings, BlurFilter, Container} from 'pixi.js';
+
+    let leon, canvas, ctx, scene, engine: Matter.Engine, app: Application;
+    const circlesContainer = new Container();
+    const sw = Math.min(window.innerWidth, 800) - 80;
+    const sh = 250;
+    let sceneObjects = [];
+    
+    let text =  {
+        leon: null as any,
+        graphics: null as Graphics 
+    }
+
+    // module aliases
+    let Engine = Matter.Engine,
+        Render = Matter.Render,
+        Runner = Matter.Runner,
+        Bodies = Matter.Bodies,
+        World = Matter.World,
+        Composite = Matter.Composite;
+
+   //settings.RESOLUTION = window.devicePixelRatio;
+
+    function init() {
+        scene = document.getElementById('scene');
+        scene.width = sw ;
+        scene.height = sh;
+        scene.style.width = sw + "px";
+        scene.style.height = sh + "px";
+
+        // Setup Pixi renderer to match the same size as the Matter world.
+        app = new Application({
+            backgroundAlpha: 0,
+            resizeTo: scene,
+            antialias: true,
+        });
+        scene.appendChild(app.view);
+        // create an engine
+        engine = Engine.create({
+
+        });
+
+        text = {
+            leon: new LeonSans({
+                text: 'ANDERS ÅBERG',
+                color: ['#000000'],
+                size: sw / 8.5,
+                weight: 450,
+                isPath: true,
+                tracking: 1,
+            }),
+            graphics: new Graphics()
+        }
+        text.leon.position(0, sh*.3);
+        console.log(text.leon);
+        app.stage.addChild(text.graphics);
+        
+       
+        // crate body?
+        //let vertices = Matter.Vertices.fromPath(text.leon.paths[0].value);
+        //let body2 = Matter.Bodies.fromVertices(40, 40, vertices);
+
+
+        app.stage.addChild(circlesContainer);
+        
+        // ADD FLOOR
+        const wallBottom = Bodies.rectangle(
+            scene.width / 2,
+            200,
+            scene.width,
+            10,
+            {
+                isStatic: true,
+            },
+        );
+        
+        // let obj = new Graphics();
+        // obj.beginFill(0x000000);
+        // obj.zIndex = 100;
+        // obj.drawRect(wallBottom.position.x - scene.width/2, wallBottom.position.y - 8, scene.width, 10);
+        // obj.endFill();
+        //
+        // var dropShadowFilter = new BlurFilter();
+        // dropShadowFilter.color = 0x000020;
+        // dropShadowFilter.alpha = 0.2;
+        // dropShadowFilter.blur = 5;
+        // dropShadowFilter.distance = 20;
+        //
+        // obj.filters = [dropShadowFilter];
+
+        let obj2 = new Graphics();
+        obj2.beginFill(0x000000);
+        obj2.drawRect(wallBottom.position.x - scene.width/2, wallBottom.position.y -3, scene.width, 2);
+        obj2.endFill();
+        obj2.zIndex = 100;
+        
+        app.stage.addChild(obj2);
+        World.addBody(engine.world, wallBottom);
+
+
+        text.leon.paths.forEach((path) => {
+            createTextObject({
+                init: {
+                    x: path.x,
+                    y: path.y,
+                },
+                radius: 5,
+                isStatic: true,
+                label: "leon"
+            })
+        });
+
+
+        // create runner
+        var runner = Runner.create();
+        // run the engine
+        Runner.run(runner, engine);
+
+        text.leon.drawPixi(text.graphics);
+
+        let elapsed = 0.0;
+        let elapsedMs = 0.0;
+        let sinceMs = 0.0;
+        app.ticker.add((delta) => {
+            elapsed += delta;
+            elapsedMs += app.ticker.deltaMS;
+            sinceMs += app.ticker.deltaMS;
+            
+            sceneObjects.forEach((object) => {
+                let x = object.body.position.x;
+                let y = object.body.position.y;
+                
+                // update position
+                object.sprite.position.x = x - object.init.x;
+                object.sprite.position.y = y - 9;
+                //console.log(elapsedMs, Math.floor(elapsedMs));
+                
+                
+                // every 0.5 seconds, create a new circle
+                if(sinceMs > 100) {
+                    sinceMs = 0;
+                    if (sceneObjects.length > 90) {
+                        let circle = sceneObjects.shift();
+
+                        Matter.Composite.remove(engine.world, circle.body)
+                        circlesContainer.removeChild(circle.sprite);
+                        console.log(engine.world.bodies.length);
+                    }
+
+                    createSceneObject({
+                        init: {
+                            x: 10 + Math.floor(Math.random() * sw),
+                            y: 10,
+                        },
+                        radius: 2 + Math.floor(Math.random() * 5),
+                        label: "circle"
+                    })
+
+                    //console.log(app.ticker.FPS)
+                }
+            });
+            
+            // remove old circles to make sure we only have 100 circles
+            
+            
+                        
+            
+            // text
+            //text.leon.updateDrawingPaths();
+
+            
+            //console.log(text.leon)
+            //console.log(text.leon.model.data.drawingPaths)
+
+            Matter.Engine.update(engine, delta * (1000 / 60));
+
+        });
+        
+        for (let i = 0; i < 1; i++) {
+            createSceneObject({
+                init: {
+                    x: 90,
+                    y: 10,
+                },
+                radius: 4,
+                label: "circle"
+            })
+        }
+
+
+        // create a renderer
+        // var render = Render.create({
+        //     element: document.getElementById("canvas"),
+        //     engine: engine,
+        //     options: {
+        //         width: sw,
+        //         height: sh,
+        //         pixelRatio: window.devicePixelRatio,
+        //     }
+        //    
+        // });
+        //Render.run(render);
+
+    }
+    
+    function createTextObject(obj) {
+        
+        let x = obj.init.x;
+        let y = obj.init.y;
+        // let vertices = Matter.Vertices.fromPath(text.leon.paths[0].value);
+        // let body2 = Matter.Bodies.fromVertices(x, y, vertices);
+        // World.addBody(engine.world, body2);
+        //
+        const circleBody = Bodies.circle(
+            x,
+            y,
+            obj.radius,
+            {
+                restitution: 0.0,
+                isStatic: obj.isStatic,
+                label: obj.label,
+                
+
+            }
+        );
+        World.addBody(engine.world, circleBody);
+
+        //
+        let template = new Graphics();
+        template.lineStyle(2, 0x993333);
+        template.beginFill(0xCC3333);
+        template.drawCircle(x,y, obj.radius);
+        template.endFill();
+        //app.stage.addChild(template);
+
+        // Add the complete scene object (body and sprite) to our array of objects. We'll track those objects in the pixi frame updates (see app.ticker below).
+        // sceneObjects.push({
+        //     body: circleBody,
+        //     sprite: template,
+        // });
+    }
+
+    function createSceneObject(obj) {
+        // Matter Body
+        
+        const allProps = [
+            {
+                color: 0xFFFFFF,
+                restitution: 0.3,
+            },
+            {
+                color: 0x2596be,
+                restitution: 0.3,
+            },
+            {
+                color: 0xf1c95a,
+                restitution: 0.3,
+            },
+            {
+                color: 0xEE0000,
+                restitution: 0.9,
+            },
+            {
+                color: 0x0000EE,
+                restitution: 0.7,
+            }
+        ];
+        
+        const props = allProps[Math.floor(Math.random() * allProps.length)];
+        
+        const circleBody = Bodies.circle(
+            obj.init.x,
+            obj.init.y,
+            obj.radius,
+            {
+                restitution: props.restitution,
+                isStatic: obj.isStatic,
+                label: obj.label,
+                
+            }
+        );
+        World.addBody(engine.world, circleBody);
+
+        //
+        let template = new Graphics();
+        template.lineStyle(1, props.color);
+        template.beginFill(props.color);
+        template.drawCircle(obj.init.x, obj.init.y, obj.radius);
+        template.endFill();
+        template.zIndex = 10;
+        circlesContainer.addChild(template);
+
+        // Add the complete scene object (body and sprite) to our array of objects. We'll track those objects in the pixi frame updates (see app.ticker below).
+        sceneObjects.push({
+            body: circleBody,
+            sprite: template,
+            init: obj.init
+        });
+    }
+
+    function animate(t) {
+        //requestAnimationFrame(animate);
+
+        ctx.clearRect(0, 0, sw, sh);
+
+        const x = (sw - leon.rect.w) / 2;
+        const y = (sh - leon.rect.h) / 2;
+        leon.position(x, y);
+
+        leon.draw(ctx);
+    }
+
+    window.onload = () => {
+        init();
+    };
+</script>
