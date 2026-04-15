@@ -4,7 +4,7 @@
 
 <div style="position:relative;">
     <div id="scene" style=""></div>
-    <div id="canvas" style="position:absolute; top:0; left:0; opacity:0.4; pointer-events:none;"></div>
+    <div id="canvas" style="display:none;"></div>
 
     <script is:inline src="./leon.js"></script>
     <script is:inline src="/matter.min.js"></script>
@@ -47,6 +47,8 @@
             backgroundAlpha: 0,
             resizeTo: scene,
             antialias: true,
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true,
         });
         scene.appendChild(app.view);
 
@@ -144,7 +146,7 @@
 
                 // update position
                 object.sprite.position.x = x - object.init.x;
-                object.sprite.position.y = y - 9;
+                object.sprite.position.y = y - object.init.y;
             });
 
             // Spawn a new ball every 100ms
@@ -176,7 +178,7 @@
             });
         }
 
-        debugRenderer();
+        //debugRenderer();
     }
 
     function debugRenderer() {
