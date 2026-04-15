@@ -1,0 +1,77 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+import Text from "../components/Text.astro";
+---
+
+<Layout title="Anders Åberg">
+	<main>
+		<h1>To scale: How big is the moon compared to the sun?</h1>
+		<p>On the screen you see the moon. Draw How big the sun is by using the buttons or by drawing on the canvas</p>
+		<div id="container"></div>
+	</main>
+</Layout>
+
+<script>
+	import { Application, Graphics, Container } from "pixi.js";
+	import { Viewport } from 'pixi-viewport'
+
+	const sw = window.innerWidth;
+    const sh = window.innerHeight;
+
+	const container = document.getElementById("container");
+	container.style.width = sw + "px";
+	container.style.height = sh + "px";
+
+	// Setup Pixi renderer to match the same size as the Matter world.
+	const app = new Application({
+		backgroundAlpha: 20,
+		resizeTo: container,
+		antialias: true,
+	});
+	container.appendChild(app.view as any);
+
+	// create viewport
+	const viewport = new Viewport({
+		screenWidth: window.innerWidth,
+		screenHeight: window.innerHeight,
+		worldWidth: 1000,
+		worldHeight: 1000,
+
+		events: app.renderer.events // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+	})
+	app.stage.addChild(viewport);
+
+	// activate plugins
+	viewport
+		.drag()
+		.pinch()
+		.wheel();
+		//.decelerate();
+
+		console.log(viewport);
+
+
+	const createCircle = (x, y, r, color) => {
+		const circle = new Graphics();
+		circle.beginFill(color);
+		circle.drawCircle(x, y, r);
+		circle.endFill();
+		return circle;
+	};
+
+	const c1 = createCircle(100,100, 40, 0xff0000);
+	app.stage.addChild(c1);
+
+	// create something 5 times bigger
+	const c2 = createCircle(500,500, 40, 0x00ff00);
+	viewport.addChild(c2);
+
+	setInterval(() => {
+		console.log(viewport);
+		console.log(c1);
+		console.log(c2)
+	}, 10000);
+</script>
+
+<style></style>

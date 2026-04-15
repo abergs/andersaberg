@@ -2,9 +2,9 @@
 
 ---
 
-<div>
+<div style="position:relative;">
     <div id="scene" style=""></div>
-    <div id="canvas" style="display:none; height: 500px; width: 500px"></div>
+    <div id="canvas" style="position:absolute; top:0; left:0; opacity:0.4; pointer-events:none;"></div>
 
     <script is:inline src="./leon.js"></script>
     <script is:inline src="/matter.min.js"></script>
@@ -18,6 +18,7 @@
     const sw = Math.min(window.innerWidth, 800) - 80;
     const sh = 250;
     let sceneObjects = [];
+    let elapsedMs = 0.0;
 
     let text = {
         leon: null as any,
@@ -73,17 +74,36 @@
         // Floor
         createFloor();
 
-        text.leon.paths.forEach((path) => {
-            createTextObject({
-                init: {
-                    x: path.x,
-                    y: path.y,
-                },
-                radius: 5,
+        // Build continuous letter surfaces using thin rectangle segments between
+        // adjacent path points. This eliminates the gaps that caused jankiness
+        // when using circles at discrete path points.
+        const pathPoints = text.leon.paths;
+        for (let i = 0; i < pathPoints.length - 1; i++) {
+            const p1 = pathPoints[i];
+            const p2 = pathPoints[i + 1];
+
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Skip if points are too far apart — they belong to different strokes
+            // or different letters and should not be connected.
+            if (dist > 25) continue;
+
+            const angle = Math.atan2(dy, dx);
+            const mx = (p1.x + p2.x) / 2;
+            const my = (p1.y + p2.y) / 2;
+
+            const segBody = Bodies.rectangle(mx, my, dist + 1, 8, {
                 isStatic: true,
+                angle: angle,
                 label: "leon",
+                friction: 0.3,
+                restitution: 0.1,
+                frictionStatic: 0.1,
             });
-        });
+            World.addBody(engine.world, segBody);
+        }
 
         // create runner
         var runner = Runner.create();
@@ -93,12 +113,30 @@
         text.leon.drawPixi(text.graphics);
 
         let elapsed = 0.0;
-        let elapsedMs = 0.0;
         let sinceMs = 0.0;
         app.ticker.add((delta) => {
             elapsed += delta;
             elapsedMs += app.ticker.deltaMS;
             sinceMs += app.ticker.deltaMS;
+
+            // Remove stuck or out-of-bounds balls
+            sceneObjects = sceneObjects.filter((object) => {
+                const vel = object.body.velocity;
+                const speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+                const stuckMs = elapsedMs - object.lastMovedMs;
+
+                if (speed > 0.3) object.lastMovedMs = elapsedMs;
+
+                const isStuck = stuckMs > 1500;
+                const isOutOfBounds = object.body.position.y > sh + 50;
+
+                if (isStuck || isOutOfBounds) {
+                    Matter.Composite.remove(engine.world, object.body);
+                    circlesContainer.removeChild(object.sprite);
+                    return false;
+                }
+                return true;
+            });
 
             sceneObjects.forEach((object) => {
                 let x = object.body.position.x;
@@ -107,18 +145,12 @@
                 // update position
                 object.sprite.position.x = x - object.init.x;
                 object.sprite.position.y = y - 9;
+            });
 
-                // every 0.5 seconds, create a new circle
-                if (sinceMs > 100) {
-                    sinceMs = 0;
-                    if (sceneObjects.length > 90) {
-                        let circle = sceneObjects.shift();
-
-                        Matter.Composite.remove(engine.world, circle.body);
-                        circlesContainer.removeChild(circle.sprite);
-                        console.log(engine.world.bodies.length);
-                    }
-
+            // Spawn a new ball every 100ms
+            if (sinceMs > 100) {
+                sinceMs = 0;
+                if (sceneObjects.length < 90) {
                     createSceneObject({
                         init: {
                             x: 10 + Math.floor(Math.random() * sw),
@@ -128,7 +160,7 @@
                         label: "circle",
                     });
                 }
-            });
+            }
 
             Matter.Engine.update(engine, delta * (1000 / 60));
         });
@@ -144,7 +176,7 @@
             });
         }
 
-        //debugRenderer();
+        debugRenderer();
     }
 
     function debugRenderer() {
@@ -184,32 +216,6 @@
 
         app.stage.addChild(g);
         World.addBody(engine.world, wallBottom);
-    }
-
-    function createTextObject(obj) {
-        let x = obj.init.x;
-        let y = obj.init.y;
-        
-        const circleBody = Bodies.circle(x, y, obj.radius, {
-            restitution: 0.0,
-            isStatic: obj.isStatic,
-            label: obj.label,
-        });
-        World.addBody(engine.world, circleBody);
-
-        // debugging
-        // let template = new Graphics();
-        // template.lineStyle(2, 0x993333);
-        // template.beginFill(0xcc3333);
-        // template.drawCircle(x, y, obj.radius);
-        // template.endFill();
-        //app.stage.addChild(template);
-
-        // Add the complete scene object (body and sprite) to our array of objects. We'll track those objects in the pixi frame updates (see app.ticker below).
-        // sceneObjects.push({
-        //     body: circleBody,
-        //     sprite: template,
-        // });
     }
 
     function createSceneObject(obj) {
@@ -261,6 +267,7 @@
             body: circleBody,
             sprite: template,
             init: obj.init,
+            lastMovedMs: elapsedMs,
         });
     }
 
