@@ -5,11 +5,12 @@ import Text from "../components/Text.astro";
 ---
 
 <Layout title="Anders Åberg">
-	<div class="physics-canvas">
-		<Text />
-	</div>
+	<div class="page-wrapper">
+		<div class="physics-canvas">
+			<Text />
+		</div>
 
-	<main>
+		<main>
 
 		<section class="intro">
 			<img src="./anders1.jpg" class="photo" alt="" />
@@ -33,7 +34,8 @@ import Text from "../components/Text.astro";
 			<p>I'm the Director of Passwordless at Bitwarden.
 				I've previously developed AI and products at Binary Brains. Earlier, I spent over a decade as a software enginner and CTO at Caspeco.</p>
 		</section>
-	</main>
+		</main>
+	</div>
 </Layout>
 
 <style>
@@ -76,14 +78,12 @@ import Text from "../components/Text.astro";
 		color: rgb(54, 54, 54);
 		font-size: 20px;
 		line-height: 1.6;
-		background-color: #cdc1bc;
-		border-radius: 12px;
 	}
 
 	main {
 		width: 900px;
 		max-width: 100%;
-		margin: -40vh auto 0;
+		margin: 60vh auto 0;
 		padding: 0;
 		position: relative;
 		z-index: 1;
@@ -109,10 +109,18 @@ import Text from "../components/Text.astro";
 		}
 	}
 
-	.physics-canvas {
+	.page-wrapper {
 		position: relative;
-		width: 100vw;
-		height: 100vh;
+		min-height: 100vh;
+		overflow: hidden;
+	}
+
+	.physics-canvas {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
 		z-index: 0;
 		overflow: hidden;
 		pointer-events: none;
