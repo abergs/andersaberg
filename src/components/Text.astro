@@ -16,9 +16,15 @@
     let leon, ctx, scene, engine: Matter.Engine, app: Application;
     const circlesContainer = new Container();
     const sw = Math.min(window.innerWidth, 800) - 80;
-    const sh = Math.round(Math.min(sw * 0.95, 480));
+    const FLOOR_SEGS = 20;
+    const FLOOR_BEND_AMPLITUDE = 70;
+    const floorBaseY = Math.round(Math.min(sw * 0.95, 480) * 0.96);
+    const sh = floorBaseY + FLOOR_BEND_AMPLITUDE + 20;
     let sceneObjects = [];
     let elapsedMs = 0.0;
+    let floorSegments: { body: Matter.Body; visual: any; baseX: number; baseY: number }[] = [];
+    let targetBend = 0;   // -1 to 1
+    let currentBend = 0;
 
     let text = {
         leon: null as any,
@@ -53,7 +59,7 @@
         scene.appendChild(app.view);
 
         // Matter engine
-        engine = Engine.create({ enableSleeping: true });
+        engine = Engine.create({ enableSleeping: false });
 
         // Leon Sans
         text = {
@@ -67,7 +73,7 @@
             }),
             graphics: new Graphics(),
         };
-        text.leon.position(0, sh * 0.72);
+        text.leon.position(0, floorBaseY * 0.76);
         app.stage.addChild(text.graphics);
 
         // add the circles container
@@ -114,12 +120,50 @@
 
         text.leon.drawPixi(text.graphics);
 
+        // Tilt floor toward mouse/touch position
+        const canvas = app.view as HTMLCanvasElement;
+        const updateBend = (clientX: number) => {
+            const rect = canvas.getBoundingClientRect();
+            const t = Math.max(0, Math.min(1, (clientX - rect.left) / sw));
+            targetBend = Math.max(-1, Math.min(1, (t - 0.5) * 4)); // full bend at ±25% from centre
+        };
+        window.addEventListener('mousemove', (e) => updateBend(e.clientX));
+        window.addEventListener('touchmove', (e) => updateBend(e.touches[0].clientX), { passive: true });
+
         let elapsed = 0.0;
         let sinceMs = 0.0;
         app.ticker.add((delta) => {
             elapsed += delta;
             elapsedMs += app.ticker.deltaMS;
             sinceMs += app.ticker.deltaMS;
+
+            // Bend floor smoothly toward target
+            currentBend += (targetBend - currentBend) * 0.04;
+
+            floorSegments.forEach((seg, i) => {
+                const x = (i + 0.5) / FLOOR_SEGS; // 0..1
+
+                // Cubic droop: only the active edge bends downward.
+                // bend > 0 → right edge droops  (mouse right → balls fall right)
+                // bend < 0 → left edge droops   (mouse left  → balls fall left)
+                let yOffset: number;
+                let slope: number;
+                if (currentBend >= 0) {
+                    yOffset = FLOOR_BEND_AMPLITUDE * currentBend * Math.pow(x, 3);
+                    slope   = FLOOR_BEND_AMPLITUDE * currentBend * 3 * Math.pow(x, 2) / sw;
+                } else {
+                    const nb = -currentBend;
+                    yOffset = FLOOR_BEND_AMPLITUDE * nb * Math.pow(1 - x, 3);
+                    slope   = -FLOOR_BEND_AMPLITUDE * nb * 3 * Math.pow(1 - x, 2) / sw;
+                }
+
+                const newY = seg.baseY + yOffset;
+                const angle = Math.atan(slope);
+                Matter.Body.setPosition(seg.body, { x: seg.baseX, y: newY });
+                Matter.Body.setAngle(seg.body, angle);
+                seg.visual.y = newY;
+                seg.visual.rotation = angle;
+            });
 
             // Remove stuck or out-of-bounds balls
             sceneObjects = sceneObjects.filter((object) => {
@@ -195,29 +239,28 @@
     }
 
     function createFloor() {
-        const wallBottom = Bodies.rectangle(
-            scene.width / 2,
-            Math.round(sh * 0.88),
-            scene.width,
-            10,
-            {
-                isStatic: true,
-            },
-        );
+        const floorY = floorBaseY;
+        const segW = sw / FLOOR_SEGS;
 
-        let g = new Graphics();
-        g.beginFill(0x000000);
-        g.drawRect(
-            wallBottom.position.x - scene.width / 2,
-            wallBottom.position.y - 5,
-            scene.width,
-            2,
-        );
-        g.endFill();
-        g.zIndex = 100;
+        for (let i = 0; i < FLOOR_SEGS; i++) {
+            const xNorm = (i + 0.5) / FLOOR_SEGS;
+            const xPx = (i + 0.5) * segW;
 
-        app.stage.addChild(g);
-        World.addBody(engine.world, wallBottom);
+            const body = Bodies.rectangle(xPx, floorY, segW + 2, 6, { isStatic: true });
+            World.addBody(engine.world, body);
+
+            // Draw centred at local (0,0) so rotation pivots correctly
+            const g = new Graphics();
+            g.beginFill(0x000000);
+            g.drawRect(-segW / 2 - 1, -1, segW + 2, 2);
+            g.endFill();
+            g.x = xPx;
+            g.y = floorY;
+            g.zIndex = 100;
+            app.stage.addChild(g);
+
+            floorSegments.push({ body, visual: g, baseX: xPx, baseY: floorY });
+        }
     }
 
     function createSceneObject(obj) {
