@@ -2,7 +2,7 @@
 
 ---
 
-<div style="position:relative;">
+<div>
     <div id="scene" style=""></div>
     <div id="canvas" style="display:none;"></div>
 
@@ -15,11 +15,14 @@
 
     let leon, ctx, scene, engine: Matter.Engine, app: Application;
     const circlesContainer = new Container();
-    const sw = Math.min(window.innerWidth, 800) - 80;
-    const FLOOR_SEGS = 20;
+    const sw = window.innerWidth;
+    const sh = window.innerHeight;
+    // Text is sized and centred based on a content width cap
+    const contentW = Math.min(window.innerWidth, 800) - 80;
+    const textX = Math.round((sw - contentW) / 2);
+    const FLOOR_SEGS = 30;
     const FLOOR_BEND_AMPLITUDE = 70;
-    const floorBaseY = Math.round(Math.min(sw * 0.95, 480) * 0.96);
-    const sh = floorBaseY + FLOOR_BEND_AMPLITUDE + 20;
+    const floorBaseY = Math.round(sh * 0.5);
     let sceneObjects = [];
     let elapsedMs = 0.0;
     let floorSegments: { body: Matter.Body; visual: any; baseX: number; baseY: number }[] = [];
@@ -66,14 +69,15 @@
             leon: new LeonSans({
                 text: "ANDERS ÅBERG",
                 color: ["#000000"],
-                size: sw / 8.5,
+                size: contentW / 8.5,
                 weight: 450,
                 isPath: true,
                 tracking: 1,
             }),
             graphics: new Graphics(),
         };
-        text.leon.position(0, floorBaseY * 0.76);
+        const fontSize = contentW / 8.5;
+        text.leon.position(textX, floorBaseY - fontSize - 20);
         app.stage.addChild(text.graphics);
 
         // add the circles container
@@ -123,9 +127,9 @@
         // Tilt floor toward mouse/touch position
         const canvas = app.view as HTMLCanvasElement;
         const updateBend = (clientX: number) => {
-            const rect = canvas.getBoundingClientRect();
-            const t = Math.max(0, Math.min(1, (clientX - rect.left) / sw));
-            targetBend = Math.max(-1, Math.min(1, (t - 0.5) * 4)); // full bend at ±25% from centre
+            // Normalise relative to the content area (not full viewport)
+            const t = Math.max(0, Math.min(1, (clientX - textX) / contentW));
+            targetBend = Math.max(-1, Math.min(1, (t - 0.5) * 4));
         };
         window.addEventListener('mousemove', (e) => updateBend(e.clientX));
         window.addEventListener('touchmove', (e) => updateBend(e.touches[0].clientX), { passive: true });
@@ -150,11 +154,11 @@
                 let slope: number;
                 if (currentBend >= 0) {
                     yOffset = FLOOR_BEND_AMPLITUDE * currentBend * Math.pow(x, 3);
-                    slope   = FLOOR_BEND_AMPLITUDE * currentBend * 3 * Math.pow(x, 2) / sw;
+                    slope   = FLOOR_BEND_AMPLITUDE * currentBend * 3 * Math.pow(x, 2) / contentW;
                 } else {
                     const nb = -currentBend;
                     yOffset = FLOOR_BEND_AMPLITUDE * nb * Math.pow(1 - x, 3);
-                    slope   = -FLOOR_BEND_AMPLITUDE * nb * 3 * Math.pow(1 - x, 2) / sw;
+                    slope   = -FLOOR_BEND_AMPLITUDE * nb * 3 * Math.pow(1 - x, 2) / contentW;
                 }
 
                 const newY = seg.baseY + yOffset;
@@ -240,11 +244,10 @@
 
     function createFloor() {
         const floorY = floorBaseY;
-        const segW = sw / FLOOR_SEGS;
+        const segW = contentW / FLOOR_SEGS;
 
         for (let i = 0; i < FLOOR_SEGS; i++) {
-            const xNorm = (i + 0.5) / FLOOR_SEGS;
-            const xPx = (i + 0.5) * segW;
+            const xPx = textX + (i + 0.5) * segW;
 
             const body = Bodies.rectangle(xPx, floorY, segW + 2, 6, { isStatic: true });
             World.addBody(engine.world, body);

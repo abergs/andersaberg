@@ -5,10 +5,13 @@ import Text from "../components/Text.astro";
 ---
 
 <Layout title="Anders Åberg">
+	<div class="physics-canvas">
+		<Text />
+	</div>
+
 	<main>
 
 		<section class="intro">
-			<div class="text"><Text /></div>
 			<img src="./anders1.jpg" class="photo" alt="" />
 			<div class="subtitle">
 				<p>I make people smile.</p>
@@ -31,8 +34,6 @@ import Text from "../components/Text.astro";
 				I've previously developed AI and products at Binary Brains. Earlier, I spent over a decade as a software enginner and CTO at Caspeco.</p>
 		</section>
 	</main>
-
-	
 </Layout>
 
 <style>
@@ -57,28 +58,6 @@ import Text from "../components/Text.astro";
 		grid-area: photo;
 	}
 
-	/* On mobile: photo floats over the canvas */
-	@media screen and (max-width: 599px) {
-		.intro {
-			position: relative;
-			display: block;
-		}
-		.text {
-			display: block;
-			width: 100%;
-		}
-		.photo {
-			position: absolute;
-			top: 30px;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 130px;
-			z-index: 2;
-		}
-		.subtitle {
-			padding: 1rem;
-		}
-	}
 
 	ul {
 		list-style: none;
@@ -97,41 +76,46 @@ import Text from "../components/Text.astro";
 		color: rgb(54, 54, 54);
 		font-size: 20px;
 		line-height: 1.6;
+		background-color: #cdc1bc;
+		border-radius: 12px;
 	}
 
 	main {
 		width: 900px;
 		max-width: 100%;
-		margin: 0 auto;
+		margin: -40vh auto 0;
 		padding: 0;
+		position: relative;
+		z-index: 1;
 	}
 	
 	.intro {
 		margin: 0 auto;
-		padding: 0 1rem;
-		
-		
+		padding: 2rem 1rem;
 		justify-items: center;
 		display: grid;
-		grid-template-rows: auto auto auto;
 		grid-template-columns: 100%;
 		grid-template-areas:
 			'photo'
-			'title'
 			'subtitle';
-
-		gap: 0;
+		gap: 30px;
 	}
 	@media screen and (min-width: 600px) {
 		.intro {
-			justify-items: center;			
-			grid-template-rows: auto auto;
+			justify-items: center;
 			grid-template-columns: minmax(auto, 1fr) 2fr;
-			grid-template-areas:
-			'title title'
-			'photo subtitle';
-		
+			grid-template-areas: 'photo subtitle';
+			align-items: center;
 		}
+	}
+
+	.physics-canvas {
+		position: relative;
+		width: 100vw;
+		height: 100vh;
+		z-index: 0;
+		overflow: hidden;
+		pointer-events: none;
 	}
 	
 
