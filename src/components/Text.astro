@@ -16,7 +16,7 @@
     let leon, ctx, scene, engine: Matter.Engine, app: Application;
     const circlesContainer = new Container();
     const sw = Math.min(window.innerWidth, 800) - 80;
-    const sh = 250;
+    const sh = Math.round(Math.min(sw * 0.95, 480));
     let sceneObjects = [];
     let elapsedMs = 0.0;
 
@@ -65,7 +65,7 @@
             }),
             graphics: new Graphics(),
         };
-        text.leon.position(0, sh * 0.3);
+        text.leon.position(0, sh * 0.72);
         app.stage.addChild(text.graphics);
 
         // add the circles container
@@ -195,7 +195,7 @@
     function createFloor() {
         const wallBottom = Bodies.rectangle(
             scene.width / 2,
-            200,
+            Math.round(sh * 0.88),
             scene.width,
             10,
             {
@@ -207,7 +207,7 @@
         g.beginFill(0x000000);
         g.drawRect(
             wallBottom.position.x - scene.width / 2,
-            wallBottom.position.y - 3,
+            wallBottom.position.y - 5,
             scene.width,
             2,
         );

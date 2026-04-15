@@ -57,6 +57,29 @@ import Text from "../components/Text.astro";
 		grid-area: photo;
 	}
 
+	/* On mobile: photo floats over the canvas */
+	@media screen and (max-width: 599px) {
+		.intro {
+			position: relative;
+			display: block;
+		}
+		.text {
+			display: block;
+			width: 100%;
+		}
+		.photo {
+			position: absolute;
+			top: 30px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 130px;
+			z-index: 2;
+		}
+		.subtitle {
+			padding: 1rem;
+		}
+	}
+
 	ul {
 		list-style: none;
 		padding-left: 0;
@@ -78,14 +101,14 @@ import Text from "../components/Text.astro";
 
 	main {
 		width: 900px;
-		max-width: calc(100% - 2rem);
+		max-width: 100%;
 		margin: 0 auto;
+		padding: 0;
 	}
 	
 	.intro {
-		margin: auto;
-		padding: 1rem;
-		padding-top: 10%;
+		margin: 0 auto;
+		padding: 0 1rem;
 		
 		
 		justify-items: center;
@@ -96,8 +119,8 @@ import Text from "../components/Text.astro";
 			'photo'
 			'title'
 			'subtitle';
-		
-		gap: 30px;
+
+		gap: 0;
 	}
 	@media screen and (min-width: 600px) {
 		.intro {
@@ -125,10 +148,10 @@ import Text from "../components/Text.astro";
 		font-size: 8rem;
 		font-weight: 400;
 		line-height: 1.1;
-		text-align: center;
-		margin-bottom: 0.1em;
-		margin-top: 0.1em;
+		margin: 0;
 		grid-area: title;
+		display: flex;
+		justify-content: center;
 	}
 	.text-gradient {
 		background-image: var(--accent-gradient);
