@@ -53,7 +53,7 @@
         scene.appendChild(app.view);
 
         // Matter engine
-        engine = Engine.create({});
+        engine = Engine.create({ enableSleeping: true });
 
         // Leon Sans
         text = {
@@ -164,7 +164,7 @@
                 }
             }
 
-            Matter.Engine.update(engine, delta * (1000 / 60));
+            Matter.Engine.update(engine, 1000 / 60);
         });
 
         for (let i = 0; i < 1; i++) {
@@ -252,6 +252,7 @@
             restitution: props.restitution,
             isStatic: obj.isStatic,
             label: obj.label,
+            frictionAir: 0.03,
         });
         World.addBody(engine.world, circleBody);
 
