@@ -13,6 +13,7 @@
     "@fontsource-variable/lora": "^5.0.9",
     "@types/matter-js": "^0.19.5",
     "astro": "^4.0.9",
+    "pixi-viewport": "^5.1.0",
     "pixi.js": "^7.3.3"
   }
 }
